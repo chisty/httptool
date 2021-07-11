@@ -41,7 +41,7 @@ func main() {
 
 	//initialize minimum number of worker goroutine to fetch http requests & calculate md5 hash
 	for i := 1; i <= minWorker; i++ {
-		go startWorker(i, reqChan, resChan, log)
+		go startWorker(reqChan, resChan)
 	}
 
 	//send all arguments to reqChan, worker goroutines will read from this channel
@@ -52,7 +52,6 @@ func main() {
 
 	wg.Wait()      //wait for receiver channel to complete
 	close(resChan) //receiver channel processed all data.
-	log.Println("work complete.")
 }
 
 //startReceiver receives data from all worker goroutine, and prints them
@@ -67,15 +66,15 @@ func startReceiver(resChan <-chan response, wg *sync.WaitGroup, log *log.Logger)
 //startWorker runs in a separate goroutine. Reads all incoming request from reqChan channel
 //and try to fetch data using httpclient from the request address.
 //On success, it creates md5 hash from response body. Otherwise, it will save the error
-func startWorker(id int, reqChan <-chan string, resChan chan<- response, log *log.Logger) {
+func startWorker(reqChan <-chan string, resChan chan<- response) {
+	client := http.Client{Timeout: 5 * time.Second}
 	for req := range reqChan {
-		log.Printf("Go: %d. Address: %s\n", id, req)
 		add, err := getFormattedAddress(req)
 		if err != nil {
 			resChan <- response{address: req, err: err}
 			continue
 		}
-		resp, err := fetch(add)
+		resp, err := fetch(add, &client)
 		if err != nil {
 			resChan <- response{address: add, err: err}
 			continue
@@ -87,8 +86,7 @@ func startWorker(id int, reqChan <-chan string, resChan chan<- response, log *lo
 }
 
 //fetch tries to do http Get request and read the response body.
-func fetch(url string) ([]byte, error) {
-	client := http.Client{Timeout: 5 * time.Second}
+func fetch(url string, client *http.Client) ([]byte, error) {
 	resp, err := client.Get(url)
 	if err != nil {
 		return nil, err
