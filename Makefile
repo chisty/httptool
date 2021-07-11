@@ -1,6 +1,6 @@
 run:
 	clear && go build -race
-	./httptool http://google.com  http://adjust.com  http//facebook.com  http//twitter.com
+	./httptool http://google.com  http://adjust.com  facebook.com  twitter.com
 
 .Phony:
 	run
