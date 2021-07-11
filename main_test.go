@@ -102,5 +102,7 @@ func TestStartWorker(t *testing.T) {
 	for _, test := range tests {
 		reqChan <- test.input
 	}
+	close(reqChan)
 	wg.Wait()
+	close(reschan)
 }
