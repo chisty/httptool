@@ -13,10 +13,10 @@ func TestGetFormattedAddress(t *testing.T) {
 		expected string
 		hasError bool
 	}{
-		{"http://adjust.com", "http://adjust.com", false},
-		{"adjust.com", "http://adjust.com", false},
-		{"http:// adjust.com", "", true},
-		{"www.adjust.com", "http://www.adjust.com", false},
+		{"http://yahoo.com", "http://yahoo.com", false},
+		{"yahoo.com", "http://yahoo.com", false},
+		{"http:// yahoo.com", "", true},
+		{"www.yahoo.com", "http://www.yahoo.com", false},
 		{"google.com", "http://google.com", false},
 		{"http://google.com", "http://google.com", false},
 		{"https://google.com", "https://google.com", false},
@@ -54,6 +54,7 @@ func TestFetchUrl(t *testing.T) {
 	}
 }
 
+//TestStartWorker will do a http request for testing.
 func TestStartWorker(t *testing.T) {
 	reqChan := make(chan string)
 	reschan := make(chan response)
@@ -64,10 +65,10 @@ func TestStartWorker(t *testing.T) {
 		expected string
 		hasError bool
 	}{
-		{"http://adjust.com", "http://adjust.com", false},
-		{"adjust.com", "http://adjust.com", false},
-		{"http:// adjust.com", "http:// adjust.com", true},
-		{"www.adjust.com", "http://www.adjust.com", false},
+		{"http://yahoo.com", "http://yahoo.com", false},
+		{"yahoo.com", "http://yahoo.com", false},
+		{"http:// yahoo.com", "http:// yahoo.com", true},
+		{"www.yahoo.com", "http://www.yahoo.com", false},
 		{"google.com", "http://google.com", false},
 		{"http://google.com", "http://google.com", false},
 		{"https://google.com", "https://google.com", false},
