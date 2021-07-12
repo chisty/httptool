@@ -19,14 +19,24 @@ type response struct {
 	err     error
 }
 
+const defaultParallel = 10
+const maxParallel = 1000 //for now, added 1000 as max concurrent/parallel request limit.
+const defaultTimeInSec = 5
+
 func main() {
 	log := log.New(os.Stdout, "", 0)
-	pFlag := flag.Int("parallel", 10, "parallel request limit")
+	pFlag := flag.Int("parallel", defaultParallel, "parallel request limit")
 	flag.Parse()
 	args := flag.Args()
 
 	//minworker represents minimum required worker/goroutine to start.
 	minWorker := *pFlag
+	if minWorker < 0 {
+		minWorker = defaultParallel
+	} else if minWorker > maxParallel {
+		minWorker = maxParallel
+	}
+
 	if len(args) < minWorker {
 		minWorker = len(args)
 	}
@@ -67,7 +77,7 @@ func startReceiver(resChan <-chan response, wg *sync.WaitGroup, log *log.Logger)
 //and try to fetch data using httpclient from the request address.
 //On success, it creates md5 hash from response body. Otherwise, it will save the error
 func startWorker(reqChan <-chan string, resChan chan<- response) {
-	client := http.Client{Timeout: 5 * time.Second}
+	client := http.Client{Timeout: defaultTimeInSec * time.Second}
 	for req := range reqChan {
 		add, err := getFormattedAddress(req)
 		if err != nil {
